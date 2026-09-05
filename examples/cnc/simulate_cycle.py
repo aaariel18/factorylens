@@ -1,6 +1,5 @@
 from factorylens.session import MachineSession
 
-
 session = MachineSession("cnc-03", "cnc_milling")
 
 events = []
