@@ -24,6 +24,7 @@ classifiers = [
 dev = ["pytest>=8.0", "ruff>=0.6"]
 camera = ["opencv-python>=4.10"]
 gesture = ["mediapipe>=0.10"]
+speech = ["faster-whisper>=1.0"]
 
 [project.scripts]
 factorylens = "factorylens.cli:main"
