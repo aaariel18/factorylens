@@ -71,12 +71,14 @@ FactoryLens is **pre-alpha**. The repository currently provides:
 - a one-command RTSP field-validation harness with JSON metrics and optional snapshot;
 - a detector-independent three-finger gesture state machine with ROI, hold, cooldown and frame sampling;
 - an optional MediaPipe hand-landmark adapter and CNC RTSP gesture demo;
+- FFmpeg-based RTSP operator voice-note capture with a 120-second ceiling and optional silence stop;
+- credential-safe audio evidence events suitable for later speech-to-text;
 - a CLI demo that emits an Open Machine Event JSON document;
 - a draft Open Machine Event format;
-- architecture, RTSP, gesture and CNC integration documentation;
+- architecture, RTSP, gesture, audio and CNC integration documentation;
 - CI and contribution scaffolding.
 
-RTSP-audio, speech-to-text, PLC/Modbus, and production recording adapters are planned work. The gesture code still requires field calibration on the real CNC installation. Do not deploy this repository as a safety system or as the sole source of machine-state truth.
+Speech-to-text, PLC/Modbus, and production recording adapters are planned work. The RTSP, gesture and audio paths still require field validation on the real CNC installation. Do not deploy this repository as a safety system or as the sole source of machine-state truth.
 
 ## CNC field prototype
 
@@ -122,7 +124,17 @@ python -m pip install -e ".[camera,gesture]"
 python examples/cnc/gesture_trigger_demo.py
 ```
 
-See [docs/RTSP_CAMERA.md](docs/RTSP_CAMERA.md) and [docs/GESTURE_TRIGGER.md](docs/GESTURE_TRIGGER.md).
+To capture the operator voice note from the camera's RTSP audio track, install FFmpeg and run:
+
+```bash
+factorylens capture-operator-note \
+  --machine-id cnc-03 \
+  --source-id cnc-03-spindle \
+  --max-seconds 120 \
+  --silence-seconds 3
+```
+
+See [docs/RTSP_CAMERA.md](docs/RTSP_CAMERA.md), [docs/GESTURE_TRIGGER.md](docs/GESTURE_TRIGGER.md) and [docs/AUDIO_CAPTURE.md](docs/AUDIO_CAPTURE.md).
 
 ## Design principles
 
@@ -137,9 +149,9 @@ See [docs/RTSP_CAMERA.md](docs/RTSP_CAMERA.md) and [docs/GESTURE_TRIGGER.md](doc
 ## Repository map
 
 ```text
-src/factorylens/       event core, session model, validation, sources and vision triggers
+src/factorylens/       event core, session model, validation, sources, audio and vision triggers
 examples/cnc/          CNC configuration, simulation and field demos
-docs/                  architecture, event format, camera/gesture setup and project vision
+docs/                  architecture, event format, camera/gesture/audio setup and project vision
 tests/                 unit tests
 .github/workflows/     CI
 ```
@@ -150,8 +162,9 @@ tests/                 unit tests
 - [x] RTSP field-validation CLI harness
 - [x] three-finger gesture trigger core + optional hand-landmark adapter
 - [ ] field-calibrated gesture accuracy on the real CNC installation
+- [x] bounded RTSP operator audio capture through FFmpeg
+- [ ] field-validated speech quality and silence settings on the real CNC installation
 - [ ] ONVIF discovery/control metadata
-- [ ] microphone / RTSP audio capture
 - [ ] offline speech-to-text
 - [ ] material and process normalizer
 - [ ] Modbus machine-state adapter

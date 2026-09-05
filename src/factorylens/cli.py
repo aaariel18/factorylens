@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import argparse
 import os
+from datetime import UTC, datetime
 from pathlib import Path
 
+from .audio import AudioCaptureConfig, FFmpegRTSPAudioCapture
 from .session import MachineSession
 from .sources import RTSPSource
 from .validation import validate_rtsp_source
@@ -46,6 +48,29 @@ def build_parser() -> argparse.ArgumentParser:
     validate.add_argument("--snapshot", type=Path)
     validate.add_argument("--reconnect-delay", type=float, default=1.0)
     validate.add_argument("--reconnect-attempts", type=int, default=3)
+
+    note = subparsers.add_parser(
+        "capture-operator-note",
+        help="capture a bounded operator voice note from the RTSP audio track",
+    )
+    note.add_argument("--machine-id", default="cnc-03")
+    note.add_argument("--machine-type", default="cnc_milling")
+    note.add_argument("--source-id", default="cnc-camera")
+    note.add_argument(
+        "--source",
+        help="RTSP URI. Prefer FACTORYLENS_RTSP_URL so credentials stay out of shell history.",
+    )
+    note.add_argument("--source-env", default="FACTORYLENS_RTSP_URL")
+    note.add_argument("--max-seconds", type=float, default=120.0)
+    note.add_argument(
+        "--silence-seconds",
+        type=float,
+        default=3.0,
+        help="stop after this much detected silence; use 0 to disable silence stop",
+    )
+    note.add_argument("--silence-threshold-db", type=float, default=-35.0)
+    note.add_argument("--start-grace-seconds", type=float, default=10.0)
+    note.add_argument("--output", type=Path)
     return parser
 
 
@@ -66,14 +91,18 @@ def run_demo(args: argparse.Namespace) -> int:
     return 0
 
 
-def run_validate_rtsp(args: argparse.Namespace) -> int:
+def _resolve_rtsp_uri(args: argparse.Namespace) -> str:
     uri = args.source or os.environ.get(args.source_env)
     if not uri:
         raise SystemExit(
             f"RTSP source missing. Set {args.source_env} or pass --source. "
             "Environment variables are recommended for credentials."
         )
+    return uri
 
+
+def run_validate_rtsp(args: argparse.Namespace) -> int:
+    uri = _resolve_rtsp_uri(args)
     source = RTSPSource(
         uri,
         source_id=args.source_id,
@@ -99,12 +128,36 @@ def run_validate_rtsp(args: argparse.Namespace) -> int:
     return 0
 
 
+def run_capture_operator_note(args: argparse.Namespace) -> int:
+    uri = _resolve_rtsp_uri(args)
+    silence_seconds = args.silence_seconds if args.silence_seconds > 0 else None
+    config = AudioCaptureConfig(
+        max_seconds=args.max_seconds,
+        silence_seconds=silence_seconds,
+        silence_threshold_db=args.silence_threshold_db,
+        start_grace_seconds=args.start_grace_seconds,
+    )
+    capture = FFmpegRTSPAudioCapture(uri, source_id=args.source_id, config=config)
+
+    output = args.output
+    if output is None:
+        timestamp = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
+        output = Path("data/operator-notes") / f"{args.machine_id}_{timestamp}.wav"
+
+    result = capture.capture(output)
+    event = result.to_event(args.machine_id, args.machine_type)
+    print(event.to_json())
+    return 0
+
+
 def main() -> int:
     args = build_parser().parse_args()
     if args.command == "demo-event":
         return run_demo(args)
     if args.command == "validate-rtsp":
         return run_validate_rtsp(args)
+    if args.command == "capture-operator-note":
+        return run_capture_operator_note(args)
     raise AssertionError(f"unhandled command: {args.command}")
 
 
