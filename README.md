@@ -72,13 +72,15 @@ FactoryLens is **pre-alpha**. The repository currently provides:
 - a detector-independent three-finger gesture state machine with ROI, hold, cooldown and frame sampling;
 - an optional MediaPipe hand-landmark adapter and CNC RTSP gesture demo;
 - FFmpeg-based RTSP operator voice-note capture with a 120-second ceiling and optional silence stop;
-- credential-safe audio evidence events suitable for later speech-to-text;
+- an offline-first pluggable speech-to-text interface with an optional faster-whisper adapter;
+- a deterministic material/process normalizer with Indonesian spoken aliases and ambiguity gates;
+- `job_context_set` emission only when required fields are unambiguous and confidence passes review gates;
 - a CLI demo that emits an Open Machine Event JSON document;
 - a draft Open Machine Event format;
-- architecture, RTSP, gesture, audio and CNC integration documentation;
+- architecture, RTSP, gesture, audio, speech and CNC integration documentation;
 - CI and contribution scaffolding.
 
-Speech-to-text, PLC/Modbus, and production recording adapters are planned work. The RTSP, gesture and audio paths still require field validation on the real CNC installation. Do not deploy this repository as a safety system or as the sole source of machine-state truth.
+PLC/Modbus and production recording adapters are planned work. The RTSP, gesture, audio and speech paths still require field validation on the real CNC installation. Do not deploy this repository as a safety system or as the sole source of machine-state truth.
 
 ## CNC field prototype
 
@@ -134,7 +136,27 @@ factorylens capture-operator-note \
   --silence-seconds 3
 ```
 
-See [docs/RTSP_CAMERA.md](docs/RTSP_CAMERA.md), [docs/GESTURE_TRIGGER.md](docs/GESTURE_TRIGGER.md) and [docs/AUDIO_CAPTURE.md](docs/AUDIO_CAPTURE.md).
+Test job normalization without any speech model:
+
+```bash
+factorylens normalize-job-text \
+  "bahan es empat lima ce proses penghalusan" \
+  --confidence 0.91 \
+  --machine-id cnc-03
+```
+
+For local speech-to-text, pre-stage a faster-whisper model and run:
+
+```bash
+python -m pip install -e ".[speech]"
+factorylens transcribe-operator-note \
+  data/operator-notes/cnc-03_YYYYMMDD_HHMMSS.wav \
+  --model /path/to/local-whisper-model \
+  --language id \
+  --machine-id cnc-03
+```
+
+See [docs/RTSP_CAMERA.md](docs/RTSP_CAMERA.md), [docs/GESTURE_TRIGGER.md](docs/GESTURE_TRIGGER.md), [docs/AUDIO_CAPTURE.md](docs/AUDIO_CAPTURE.md) and [docs/SPEECH_JOB_CONTEXT.md](docs/SPEECH_JOB_CONTEXT.md).
 
 ## Design principles
 
@@ -149,9 +171,9 @@ See [docs/RTSP_CAMERA.md](docs/RTSP_CAMERA.md), [docs/GESTURE_TRIGGER.md](docs/G
 ## Repository map
 
 ```text
-src/factorylens/       event core, session model, validation, sources, audio and vision triggers
+src/factorylens/       event core, session model, validation, sources, audio, speech and vision
 examples/cnc/          CNC configuration, simulation and field demos
-docs/                  architecture, event format, camera/gesture/audio setup and project vision
+docs/                  architecture, event format, setup guides and project vision
 tests/                 unit tests
 .github/workflows/     CI
 ```
@@ -164,9 +186,10 @@ tests/                 unit tests
 - [ ] field-calibrated gesture accuracy on the real CNC installation
 - [x] bounded RTSP operator audio capture through FFmpeg
 - [ ] field-validated speech quality and silence settings on the real CNC installation
+- [x] pluggable offline speech-to-text interface + optional faster-whisper adapter
+- [x] controlled material/process normalizer with ambiguity/confidence gating
+- [ ] field-validated vocabulary and transcription accuracy on real operator audio
 - [ ] ONVIF discovery/control metadata
-- [ ] offline speech-to-text
-- [ ] material and process normalizer
 - [ ] Modbus machine-state adapter
 - [ ] OPC UA adapter
 - [ ] MQTT and webhook outputs
@@ -184,7 +207,7 @@ See [docs/OPEN_MACHINE_EVENT.md](docs/OPEN_MACHINE_EVENT.md).
 
 ## Security
 
-Never commit RTSP usernames/passwords, camera accounts, PLC credentials, internal IP inventories, production video, or `.env` files. Use `.env.example` only as a template.
+Never commit RTSP usernames/passwords, camera accounts, PLC credentials, internal IP inventories, production video, operator audio, transcripts, or `.env` files. Use `.env.example` only as a template.
 
 See [SECURITY.md](SECURITY.md).
 
