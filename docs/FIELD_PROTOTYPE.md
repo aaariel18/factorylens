@@ -2,6 +2,8 @@
 
 These field notes document the first physical camera-placement experiments for FactoryLens on a CNC milling machine.
 
+![Annotated CNC field prototype](assets/factorylens-field-prototype.jpg)
+
 The goal is not to claim a production-ready installation. The goal is to record what was tested, what the camera can see, and what must be improved before reliable event capture and computer vision are attempted.
 
 ## Photo 1: initial camera positioning
