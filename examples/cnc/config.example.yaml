@@ -1,0 +1,37 @@
+machine:
+  id: cnc-03
+  type: cnc_milling
+
+camera:
+  adapter: rtsp
+  url_env: FACTORYLENS_RTSP_URL
+  stream_role: spindle
+
+operator_input:
+  trigger:
+    type: gesture
+    gesture: three_fingers
+    hold_seconds: 1.5
+    cooldown_seconds: 10
+  voice:
+    max_seconds: 120
+    stop_after_silence_seconds: 3
+
+job_context:
+  required_fields:
+    - material
+    - process
+
+cycle_start:
+  # Prefer a controller/PLC signal when available.
+  adapter: placeholder
+  strategy: external_signal
+
+evidence:
+  cycle_start_snapshots_seconds: [0, 2, 10]
+  video:
+    enabled: true
+    pre_roll_seconds: 10
+
+storage:
+  root: ./data/jobs

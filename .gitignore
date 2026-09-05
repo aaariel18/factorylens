@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environments and secrets
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Runtime artifacts
+data/
+recordings/
+captures/
+*.mp4
+*.avi
+*.wav
+*.mkv
+*.onnx
+*.pt
+*.engine
+
+# Local machine configuration
+config.local.yaml
+secrets/
