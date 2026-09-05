@@ -8,6 +8,7 @@ from pathlib import Path
 from .audio import AudioCaptureConfig, FFmpegRTSPAudioCapture
 from .session import MachineSession
 from .sources import RTSPSource
+from .speech import FasterWhisperTranscriber, JobContextNormalizer, Transcript
 from .validation import validate_rtsp_source
 
 
@@ -71,6 +72,29 @@ def build_parser() -> argparse.ArgumentParser:
     note.add_argument("--silence-threshold-db", type=float, default=-35.0)
     note.add_argument("--start-grace-seconds", type=float, default=10.0)
     note.add_argument("--output", type=Path)
+
+    normalize = subparsers.add_parser(
+        "normalize-job-text",
+        help="normalize an operator transcript into material/process job context",
+    )
+    normalize.add_argument("text", help="quoted operator transcript")
+    normalize.add_argument("--confidence", type=float)
+    normalize.add_argument("--machine-id")
+    normalize.add_argument("--machine-type", default="cnc_milling")
+
+    transcribe = subparsers.add_parser(
+        "transcribe-operator-note",
+        help="transcribe a local voice note and normalize its material/process context",
+    )
+    transcribe.add_argument("audio", type=Path)
+    transcribe.add_argument(
+        "--model",
+        default="small",
+        help="faster-whisper model name or local model directory",
+    )
+    transcribe.add_argument("--language", default="id")
+    transcribe.add_argument("--machine-id")
+    transcribe.add_argument("--machine-type", default="cnc_milling")
     return parser
 
 
@@ -150,6 +174,25 @@ def run_capture_operator_note(args: argparse.Namespace) -> int:
     return 0
 
 
+def _print_job_context(args: argparse.Namespace, transcript: Transcript) -> int:
+    result = JobContextNormalizer().normalize(transcript)
+    print(result.to_json())
+    if args.machine_id and result.ready:
+        print(result.to_event(args.machine_id, args.machine_type).to_json())
+    return 0 if result.ready else 2
+
+
+def run_normalize_job_text(args: argparse.Namespace) -> int:
+    transcript = Transcript(text=args.text, confidence=args.confidence)
+    return _print_job_context(args, transcript)
+
+
+def run_transcribe_operator_note(args: argparse.Namespace) -> int:
+    transcriber = FasterWhisperTranscriber(args.model)
+    transcript = transcriber.transcribe(args.audio, language=args.language)
+    return _print_job_context(args, transcript)
+
+
 def main() -> int:
     args = build_parser().parse_args()
     if args.command == "demo-event":
@@ -158,6 +201,10 @@ def main() -> int:
         return run_validate_rtsp(args)
     if args.command == "capture-operator-note":
         return run_capture_operator_note(args)
+    if args.command == "normalize-job-text":
+        return run_normalize_job_text(args)
+    if args.command == "transcribe-operator-note":
+        return run_transcribe_operator_note(args)
     raise AssertionError(f"unhandled command: {args.command}")
 
 
