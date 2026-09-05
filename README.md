@@ -68,6 +68,7 @@ FactoryLens is **pre-alpha**. The repository currently provides:
 - a small, dependency-light machine-event core;
 - a session state machine for operator context and machine cycles;
 - a reconnect-capable RTSP frame source with credential-safe metadata;
+- a one-command RTSP field-validation harness with JSON metrics and optional snapshot;
 - a CLI demo that emits an Open Machine Event JSON document;
 - a draft Open Machine Event format;
 - architecture, RTSP and CNC integration documentation;
@@ -102,7 +103,15 @@ For a real RTSP camera source:
 ```bash
 python -m pip install -e ".[camera]"
 export FACTORYLENS_RTSP_URL='rtsp://USERNAME:PASSWORD@CAMERA_IP:554/stream1'
+
+factorylens validate-rtsp \
+  --source-id cnc-03-spindle \
+  --duration 60 \
+  --snapshot data/validation/cnc-03-first-frame.jpg \
+  --report data/validation/cnc-03-rtsp-report.json
 ```
+
+The report and snapshot remain under the Git-ignored `data/` directory. The report stores the RTSP source URI with credentials redacted.
 
 See [docs/RTSP_CAMERA.md](docs/RTSP_CAMERA.md).
 
@@ -119,7 +128,7 @@ See [docs/RTSP_CAMERA.md](docs/RTSP_CAMERA.md).
 ## Repository map
 
 ```text
-src/factorylens/       event core, session model and source adapters
+src/factorylens/       event core, session model, validation and source adapters
 examples/cnc/          CNC example configuration and simulation
 docs/                  architecture, event format, camera setup and project vision
 tests/                 unit tests
@@ -129,6 +138,7 @@ tests/                 unit tests
 ## Integration status
 
 - [x] RTSP frame source with reconnect and frame metadata
+- [x] RTSP field-validation CLI harness
 - [ ] ONVIF discovery/control metadata
 - [ ] hand gesture trigger
 - [ ] microphone / RTSP audio capture
