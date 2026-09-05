@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import StrEnum
 from pathlib import Path
 from typing import Any
@@ -35,7 +35,7 @@ class MachineEvent:
     event_type: EventType
     machine_id: str
     machine_type: str = "unknown"
-    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
     job: dict[str, Any] = field(default_factory=dict)
     data: dict[str, Any] = field(default_factory=dict)
     evidence: tuple[Evidence, ...] = ()
