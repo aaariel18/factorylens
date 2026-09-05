@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 import os
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 from .audio import AudioCaptureConfig, FFmpegRTSPAudioCapture
@@ -141,7 +141,7 @@ def run_capture_operator_note(args: argparse.Namespace) -> int:
 
     output = args.output
     if output is None:
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
         output = Path("data/operator-notes") / f"{args.machine_id}_{timestamp}.wav"
 
     result = capture.capture(output)
