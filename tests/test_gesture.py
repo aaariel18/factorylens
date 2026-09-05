@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta, UTC
+from datetime import UTC, datetime, timedelta
 
 from factorylens.events import EventType
 from factorylens.vision import (
@@ -9,7 +9,6 @@ from factorylens.vision import (
     NormalizedROI,
     ThreeFingerGestureTrigger,
 )
-
 
 BASE = datetime(2026, 9, 5, 7, 0, tzinfo=UTC)
 
