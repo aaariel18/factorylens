@@ -10,7 +10,6 @@ from factorylens.vision import (
 )
 from factorylens.vision.mediapipe_hands import MediaPipeHandsDetector
 
-
 uri = os.environ["FACTORYLENS_RTSP_URL"]
 source = RTSPSource(uri, source_id="cnc-03-spindle")
 detector = MediaPipeHandsDetector(count_thumb=False)
