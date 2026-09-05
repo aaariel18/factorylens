@@ -4,10 +4,11 @@ import re
 import shutil
 import subprocess
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import IO, Any, Callable, Protocol
+from typing import IO, Any, Protocol
 
 from .events import Evidence, EventType, MachineEvent
 from .sources.rtsp import redact_rtsp_uri
