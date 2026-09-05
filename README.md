@@ -69,12 +69,14 @@ FactoryLens is **pre-alpha**. The repository currently provides:
 - a session state machine for operator context and machine cycles;
 - a reconnect-capable RTSP frame source with credential-safe metadata;
 - a one-command RTSP field-validation harness with JSON metrics and optional snapshot;
+- a detector-independent three-finger gesture state machine with ROI, hold, cooldown and frame sampling;
+- an optional MediaPipe hand-landmark adapter and CNC RTSP gesture demo;
 - a CLI demo that emits an Open Machine Event JSON document;
 - a draft Open Machine Event format;
-- architecture, RTSP and CNC integration documentation;
+- architecture, RTSP, gesture and CNC integration documentation;
 - CI and contribution scaffolding.
 
-The hand-gesture, RTSP-audio, speech-to-text, PLC/Modbus, and production recording adapters are planned work. Do not deploy this repository as a safety system or as the sole source of machine-state truth.
+RTSP-audio, speech-to-text, PLC/Modbus, and production recording adapters are planned work. The gesture code still requires field calibration on the real CNC installation. Do not deploy this repository as a safety system or as the sole source of machine-state truth.
 
 ## CNC field prototype
 
@@ -113,7 +115,14 @@ factorylens validate-rtsp \
 
 The report and snapshot remain under the Git-ignored `data/` directory. The report stores the RTSP source URI with credentials redacted.
 
-See [docs/RTSP_CAMERA.md](docs/RTSP_CAMERA.md).
+To test the three-finger operator trigger after the RTSP baseline is stable:
+
+```bash
+python -m pip install -e ".[camera,gesture]"
+python examples/cnc/gesture_trigger_demo.py
+```
+
+See [docs/RTSP_CAMERA.md](docs/RTSP_CAMERA.md) and [docs/GESTURE_TRIGGER.md](docs/GESTURE_TRIGGER.md).
 
 ## Design principles
 
@@ -128,9 +137,9 @@ See [docs/RTSP_CAMERA.md](docs/RTSP_CAMERA.md).
 ## Repository map
 
 ```text
-src/factorylens/       event core, session model, validation and source adapters
-examples/cnc/          CNC example configuration and simulation
-docs/                  architecture, event format, camera setup and project vision
+src/factorylens/       event core, session model, validation, sources and vision triggers
+examples/cnc/          CNC configuration, simulation and field demos
+docs/                  architecture, event format, camera/gesture setup and project vision
 tests/                 unit tests
 .github/workflows/     CI
 ```
@@ -139,8 +148,9 @@ tests/                 unit tests
 
 - [x] RTSP frame source with reconnect and frame metadata
 - [x] RTSP field-validation CLI harness
+- [x] three-finger gesture trigger core + optional hand-landmark adapter
+- [ ] field-calibrated gesture accuracy on the real CNC installation
 - [ ] ONVIF discovery/control metadata
-- [ ] hand gesture trigger
 - [ ] microphone / RTSP audio capture
 - [ ] offline speech-to-text
 - [ ] material and process normalizer
