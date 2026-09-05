@@ -67,12 +67,21 @@ FactoryLens is **pre-alpha**. The repository currently provides:
 
 - a small, dependency-light machine-event core;
 - a session state machine for operator context and machine cycles;
+- a reconnect-capable RTSP frame source with credential-safe metadata;
 - a CLI demo that emits an Open Machine Event JSON document;
 - a draft Open Machine Event format;
-- architecture and CNC integration documentation;
+- architecture, RTSP and CNC integration documentation;
 - CI and contribution scaffolding.
 
-The RTSP, hand-gesture, speech-to-text, PLC/Modbus, and production recording adapters are planned work. Do not deploy this repository as a safety system or as the sole source of machine-state truth.
+The hand-gesture, RTSP-audio, speech-to-text, PLC/Modbus, and production recording adapters are planned work. Do not deploy this repository as a safety system or as the sole source of machine-state truth.
+
+## CNC field prototype
+
+![FactoryLens CNC field prototype](docs/assets/factorylens-field-prototype.jpg)
+
+The first physical camera-placement experiment is now documented, including mounting observations, collision/vibration concerns, ROI considerations, cable routing and the next field-validation checklist.
+
+See [docs/FIELD_PROTOTYPE.md](docs/FIELD_PROTOTYPE.md).
 
 ## Quick start
 
@@ -88,6 +97,15 @@ factorylens demo-event --output demo-event.jsonl
 pytest
 ```
 
+For a real RTSP camera source:
+
+```bash
+python -m pip install -e ".[camera]"
+export FACTORYLENS_RTSP_URL='rtsp://USERNAME:PASSWORD@CAMERA_IP:554/stream1'
+```
+
+See [docs/RTSP_CAMERA.md](docs/RTSP_CAMERA.md).
+
 ## Design principles
 
 1. **Legacy-first** — useful even when a machine has no cloud API.
@@ -101,26 +119,27 @@ pytest
 ## Repository map
 
 ```text
-src/factorylens/       event core and session model
+src/factorylens/       event core, session model and source adapters
 examples/cnc/          CNC example configuration and simulation
-docs/                  architecture, event format, and project vision
+docs/                  architecture, event format, camera setup and project vision
 tests/                 unit tests
 .github/workflows/     CI
 ```
 
-## Planned integrations
+## Integration status
 
-- RTSP / ONVIF cameras
-- hand gesture trigger
-- microphone / RTSP audio capture
-- offline speech-to-text
-- material and process normalizer
-- Modbus machine-state adapter
-- OPC UA adapter
-- MQTT and webhook outputs
-- pre-roll video buffer
-- multi-camera evidence capture
-- dashboard and searchable machine timeline
+- [x] RTSP frame source with reconnect and frame metadata
+- [ ] ONVIF discovery/control metadata
+- [ ] hand gesture trigger
+- [ ] microphone / RTSP audio capture
+- [ ] offline speech-to-text
+- [ ] material and process normalizer
+- [ ] Modbus machine-state adapter
+- [ ] OPC UA adapter
+- [ ] MQTT and webhook outputs
+- [ ] pre-roll video buffer
+- [ ] multi-camera evidence capture
+- [ ] dashboard and searchable machine timeline
 
 See [ROADMAP.md](ROADMAP.md) for the staged plan.
 
