@@ -5,7 +5,7 @@ import time
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Any, Protocol
+from typing import Any, Protocol, Self
 from urllib.parse import urlsplit, urlunsplit
 
 
@@ -67,7 +67,7 @@ def _default_capture_factory(uri: str) -> CaptureLike:
     return cv2.VideoCapture(uri)
 
 
-def _normalise_fps(value: float | int | None) -> float | None:
+def _normalise_fps(value: float | None) -> float | None:
     if value is None:
         return None
     fps = float(value)
@@ -198,7 +198,7 @@ class RTSPSource:
             yield self.read()
             yielded += 1
 
-    def __enter__(self) -> RTSPSource:
+    def __enter__(self) -> Self:
         self.open()
         return self
 
