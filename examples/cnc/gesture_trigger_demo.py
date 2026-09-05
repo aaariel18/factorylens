@@ -3,7 +3,11 @@ from __future__ import annotations
 import os
 
 from factorylens.sources import RTSPSource
-from factorylens.vision import GestureTriggerConfig, NormalizedROI, ThreeFingerGestureTrigger
+from factorylens.vision import (
+    GestureTriggerConfig,
+    NormalizedROI,
+    ThreeFingerGestureTrigger,
+)
 from factorylens.vision.mediapipe_hands import MediaPipeHandsDetector
 
 
