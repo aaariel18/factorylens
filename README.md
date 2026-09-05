@@ -75,6 +75,14 @@ FactoryLens is **pre-alpha**. The repository currently provides:
 
 The hand-gesture, RTSP-audio, speech-to-text, PLC/Modbus, and production recording adapters are planned work. Do not deploy this repository as a safety system or as the sole source of machine-state truth.
 
+## CNC field prototype
+
+![FactoryLens CNC field prototype](docs/assets/factorylens-field-prototype.jpg)
+
+The first physical camera-placement experiment is now documented, including mounting observations, collision/vibration concerns, ROI considerations, cable routing and the next field-validation checklist.
+
+See [docs/FIELD_PROTOTYPE.md](docs/FIELD_PROTOTYPE.md).
+
 ## Quick start
 
 Requires Python 3.11+.
