@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, Self
 
 from .gesture import HandGestureObservation
 
@@ -105,7 +105,7 @@ class MediaPipeHandsDetector:
     def close(self) -> None:
         self._hands.close()
 
-    def __enter__(self) -> MediaPipeHandsDetector:
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, exc_type, exc, traceback) -> None:
