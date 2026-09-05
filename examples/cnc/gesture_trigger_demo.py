@@ -22,21 +22,17 @@ trigger = ThreeFingerGestureTrigger(
     ),
 )
 
-try:
-    with source, detector:
-        for packet in source.frames():
-            observation = None
-            if packet.sequence % trigger.config.sample_every_n_frames == 0:
-                observation = detector.detect(
-                    packet.frame,
-                    timestamp=packet.timestamp,
-                    source_id=packet.source_id,
-                )
+with source, detector:
+    for packet in source.frames():
+        observation = None
+        if packet.sequence % trigger.config.sample_every_n_frames == 0:
+            observation = detector.detect(
+                packet.frame,
+                timestamp=packet.timestamp,
+                source_id=packet.source_id,
+            )
 
-            result = trigger.process(observation, frame_sequence=packet.sequence)
-            if result.triggered and result.event is not None:
-                print(result.event.to_json())
-                break
-finally:
-    source.close()
-    detector.close()
+        result = trigger.process(observation, frame_sequence=packet.sequence)
+        if result.triggered and result.event is not None:
+            print(result.event.to_json())
+            break
