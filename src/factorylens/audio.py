@@ -8,9 +8,9 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import IO, Any, Protocol
+from typing import IO, Protocol
 
-from .events import Evidence, EventType, MachineEvent
+from .events import EventType, Evidence, MachineEvent
 from .sources.rtsp import redact_rtsp_uri
 
 
