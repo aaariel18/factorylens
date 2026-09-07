@@ -11,7 +11,6 @@ import factorylens.simulation
 import factorylens.sources.rtsp
 import factorylens.workflow
 
-
 BASE = datetime(2026, 9, 7, 2, 0, tzinfo=UTC)
 
 
