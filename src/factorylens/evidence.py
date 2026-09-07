@@ -7,7 +7,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, Protocol
 
-from .events import Evidence, EventType, MachineEvent
+from .events import EventType, Evidence, MachineEvent
 from .sources.rtsp import FramePacket
 
 
@@ -153,7 +153,7 @@ class JobEvidenceRecorder:
 
     def _snapshot_event(self, packet: FramePacket, offset: float) -> MachineEvent:
         assert self._job_dir is not None
-        filename = f"start_{int(round(offset)):03d}s.jpg"
+        filename = f"start_{round(offset):03d}s.jpg"
         path = self._job_dir / filename
         self.backend.save_image(path, packet.frame)
         event = MachineEvent(
