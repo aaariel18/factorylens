@@ -108,17 +108,17 @@ class JobEvidenceRecorder:
     job: dict[str, Any] = field(default_factory=dict)
     config: EvidenceRecorderConfig = field(default_factory=EvidenceRecorderConfig)
     backend: EvidenceBackend = field(default_factory=OpenCVEvidenceBackend)
+    _buffer: deque[FramePacket] = field(init=False, default_factory=deque, repr=False)
+    _events: list[MachineEvent] = field(init=False, default_factory=list, repr=False)
+    _video_sink: VideoSink | None = field(init=False, default=None, repr=False)
+    _video_path: Path | None = field(init=False, default=None, repr=False)
+    _job_dir: Path | None = field(init=False, default=None, repr=False)
+    _cycle_started_at: datetime | None = field(init=False, default=None, repr=False)
+    _captured_offsets: set[float] = field(init=False, default_factory=set, repr=False)
 
     def __post_init__(self) -> None:
         if not self.machine_id.strip():
             raise ValueError("machine_id must not be empty")
-        self._buffer: deque[FramePacket] = deque()
-        self._events: list[MachineEvent] = []
-        self._video_sink: VideoSink | None = None
-        self._video_path: Path | None = None
-        self._job_dir: Path | None = None
-        self._cycle_started_at: datetime | None = None
-        self._captured_offsets: set[float] = set()
 
     @property
     def active(self) -> bool:
@@ -271,9 +271,15 @@ class JobEvidenceRecorder:
             encoding="utf-8",
         )
 
-        return JobEvidenceResult(
+        result = JobEvidenceResult(
             job_dir=self._job_dir,
             manifest_path=manifest_path,
             video_path=self._video_path,
             events=tuple(self._events),
         )
+        self._events.clear()
+        self._captured_offsets.clear()
+        self._cycle_started_at = None
+        self._video_path = None
+        self._job_dir = None
+        return result
