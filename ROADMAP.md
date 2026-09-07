@@ -8,23 +8,37 @@ The roadmap favors a small, composable core over a giant first release.
 - [x] operator-context / machine-cycle state machine
 - [x] CLI demo
 - [x] draft Open Machine Event format
-- [ ] RTSP camera adapter
-- [ ] three-finger gesture trigger
-- [ ] audio capture with a 120-second maximum and silence stop
-- [ ] speech-to-text adapter
-- [ ] material/process normalizer
-- [ ] machine-start trigger interface
-- [ ] snapshots at cycle start
-- [ ] event video recorder with pre-roll
+- [x] RTSP camera adapter
+- [x] three-finger gesture trigger
+- [x] audio capture with a 120-second maximum and silence stop
+- [x] speech-to-text adapter
+- [x] material/process normalizer
+- [x] machine-start/finish trigger interface with measured/inferred provenance
+- [x] snapshots at cycle start (default 0s / +2s / +10s)
+- [x] MP4 event video recorder with decoded-frame pre-roll
+- [x] one job evidence manifest that can include context, audio, snapshots and video events
+- [x] end-to-end orchestration test for armed job -> cycle start -> evidence -> cycle finish
+
+### v0.1 field-validation gates
+
+The software path is implemented, but an alpha release is not considered field-validated until the physical CNC tests are completed:
+
+- [ ] real RTSP stability and reconnect baseline (#10)
+- [ ] three-finger gesture calibration and false-positive test (#13)
+- [ ] real camera microphone / CNC noise validation (#15)
+- [ ] real operator speech-to-job-context benchmark (#17)
+- [ ] real machine-run signal mapping for the first CNC installation
+- [ ] one complete real machining cycle producing a reviewable job evidence bundle
 
 ## v0.2 — Reliable edge recording
 
-- [ ] RTSP reconnect strategy
+- [x] RTSP reconnect strategy
 - [ ] audio/video synchronization
 - [ ] configurable evidence retention
 - [ ] multi-camera source registry
-- [ ] H.264/MP4 recording path
-- [ ] checksums and event evidence manifest
+- [ ] encoded H.264/MP4 recording path without decoded-frame pre-roll pressure
+- [ ] checksums for evidence artifacts
+- [x] JSON event evidence manifest
 - [ ] local SQLite event store
 
 ## v0.3 — Machine signals
