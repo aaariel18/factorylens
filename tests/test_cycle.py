@@ -4,7 +4,6 @@ import factorylens.cycle
 import factorylens.events
 import factorylens.simulation
 
-
 BASE = datetime(2026, 9, 7, 1, 0, tzinfo=UTC)
 
 
