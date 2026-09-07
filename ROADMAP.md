@@ -27,8 +27,10 @@ The software path is implemented, but an alpha release is not considered field-v
 - [ ] three-finger gesture calibration and false-positive test (#13)
 - [ ] real camera microphone / CNC noise validation (#15)
 - [ ] real operator speech-to-job-context benchmark (#17)
-- [ ] real machine-run signal mapping for the first CNC installation
-- [ ] one complete real machining cycle producing a reviewable job evidence bundle
+- [ ] real machine-run signal mapping for the first CNC installation (#20)
+- [ ] one complete real machining cycle producing a reviewable job evidence bundle (#21)
+
+When all six gates are complete, review benchmark results, known limitations, and privacy/safety documentation before tagging `v0.1.0-alpha`.
 
 ## v0.2 — Reliable edge recording
 
