@@ -1,50 +1,58 @@
 # CNC Field Prototype
 
-These field notes document the first physical camera-placement experiments for FactoryLens on a CNC milling machine.
+These field notes document the first physical FactoryLens camera installation on a CNC milling machine.
 
 ![Annotated CNC field prototype](assets/factorylens-field-prototype.jpg)
 
-The goal is not to claim a production-ready installation. The goal is to record what was tested, what the camera can see, and what must be improved before reliable event capture and computer vision are attempted.
+The first camera installation is now complete. This does **not** mean the system is production-ready or field-validated yet. The goal of this stage is to move from placement experiments into real validation of mounting, stream stability, image quality, audio, gesture input and cycle evidence capture.
 
-## Photo 1: initial camera positioning
+## Photo 1: operator + installed CNC prototype
 
-The camera is being positioned beside the spindle area using a fabricated metal bracket. This stage is useful for checking field of view, mechanical clearance, cable direction and whether the camera can observe the intended spindle/tool region without obstructing machine movement.
+The operator and CNC environment are shown together after the first installation milestone. This is the clearest project-level proof that FactoryLens has moved beyond a software-only concept and into a real machine environment.
 
-## Photo 2: mounted close observation angle
+## Photo 2: camera positioning and bracket fit
 
-The camera is fixed to the bracket and aimed toward the spindle area. This is the type of view that can later support a small ROI for tool-presence or machine-state observation. The bracket should be checked for vibration, fastener loosening and collision clearance during all machine motions.
+The camera is positioned beside the spindle area using a fabricated metal bracket. This view is useful for checking field of view, mechanical clearance, cable direction and whether the camera can observe the intended spindle/tool region without obstructing machine movement.
 
-## Photo 3: observation during machining setup
+## Photo 3: mounted close observation angle
 
-The camera has a wider operational view that includes the spindle, tool and workpiece/fixture area. This placement is valuable for event evidence because one frame can provide context around the machining cycle instead of showing only an isolated tool tip.
+The camera is fixed to the bracket and aimed toward the spindle area. This is the type of view that can later support a small ROI for tool-presence or machine-state observation. The bracket still needs vibration, fastener, collision-clearance and cable-strain checks during real machine motion.
 
-## Photo 4: first field deployment milestone
+## Photo 4: installed operational observation view
 
-The CNC machine and operator environment are shown together after the initial installation work. This marks the transition from a software-only prototype toward a real machine-observability experiment.
+The installed camera has a wider operational view that includes the spindle, tool and workpiece/fixture area. This placement is valuable for event evidence because one frame can provide context around the machining cycle instead of showing only an isolated tool tip.
+
+## Installation milestone
+
+The first physical camera installation answers an important question: the proposed FactoryLens observation point is mechanically possible on the CNC prototype and can provide a useful view of the spindle/work area.
+
+What remains open is validation under actual operation. A successful installation is not yet proof of reliable monitoring.
 
 ## What these photos tell us
 
-The physical prototype already answers several important design questions:
-
-1. A camera can be mounted close enough to observe the spindle/work area without relying on a distant room-level CCTV view.
-2. A dedicated bracket is practical, but vibration, collision envelope and cable strain relief must be treated as engineering requirements.
-3. The view can include both a narrow tool ROI and enough surrounding context for evidence recording.
-4. Chips, coolant, oil mist, reflections and changing machine lighting are real deployment conditions and must be represented in future datasets and tests.
+1. A camera can be installed close enough to observe the spindle/work area without relying on distant room-level CCTV.
+2. A dedicated bracket is practical, but vibration, collision envelope and cable strain relief remain engineering requirements.
+3. The selected view can include both a narrow tool ROI and enough surrounding context for evidence recording.
+4. Chips, coolant, oil mist, reflections and changing machine lighting are real deployment conditions and must be represented in future tests and datasets.
 5. The camera location is close enough that microphone quality should be tested carefully before relying on camera audio for operator voice notes.
+6. The project can now proceed from mounting work into RTSP, gesture, audio and complete-cycle field validation.
 
 ## Next field validation checklist
 
-Before calling the mounting production-ready, validate:
+Before calling the installation field-ready, validate:
 
 - full X/Y/Z machine travel and tool-change clearance;
 - camera/bracket vibration at idle, spindle run and cutting conditions;
+- fastener security after repeated machine cycles;
 - cable strain relief and routing outside moving/abrasive zones;
 - lens protection from chips, coolant and oil while keeping the microphone path usable;
 - exposure and glare with machine lights on/off and wet surfaces;
 - RTSP stability for a complete machining cycle;
-- actual frame rate and reconnect behavior;
+- actual frame rate, latency and reconnect behavior;
 - ROI stability after vibration and repeated machine cycles;
-- audio intelligibility with spindle, coolant and nearby machines running.
+- gesture accuracy from the intended operator standing position;
+- audio intelligibility with spindle, coolant and nearby machines running;
+- one complete machine cycle that produces a reviewable evidence bundle.
 
 ## Safety boundary
 
