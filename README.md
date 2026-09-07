@@ -23,70 +23,60 @@ Sensors ─────────────┘                    ├─ sna
                                           └─ structured metadata
 ```
 
-## Flagship workflow
-
-The first CNC workflow is intentionally simple and human-friendly:
+## Flagship CNC workflow
 
 ```text
 Operator shows 3 fingers
         ↓
 Capture an operator voice note
         ↓
-"Material S45C, process finishing"
+"Bahan S45C, proses penghalusan"
         ↓
-Normalize material + process metadata
+Speech-to-text + controlled normalization
         ↓
-Wait for CNC cycle start
+JOB_CONTEXT_SET
         ↓
-Capture start snapshots + video
+Wait for a stable machine-running signal
         ↓
-Record anomaly/event evidence
+MACHINE_CYCLE_STARTED
         ↓
-Close the cycle and save one job record
+Flush video pre-roll + capture 0s / +2s / +10s snapshots
+        ↓
+Record the machining cycle
+        ↓
+MACHINE_CYCLE_FINISHED
+        ↓
+Write one evidence manifest for the job
 ```
 
 The long-term idea is **human-to-machine metadata**: let operators attach production context to a machine without stopping to use a keyboard.
 
-## Example machine timeline
-
-```text
-09:13:02  GESTURE_3_FINGERS
-09:13:04  OPERATOR_NOTE_STARTED
-09:13:11  JOB_CONTEXT_SET        material=S45C process=finishing
-09:14:22  MACHINE_CYCLE_STARTED
-09:14:22  SNAPSHOT_CAPTURED
-09:14:22  VIDEO_RECORDING_STARTED
-09:18:41  TOOL_ANOMALY
-09:18:41  EVIDENCE_CAPTURED
-09:23:17  MACHINE_CYCLE_FINISHED
-```
-
 ## Current status
 
-FactoryLens is **pre-alpha**. The repository currently provides:
+FactoryLens is **pre-alpha**. The v0.1 software path now includes:
 
-- a small, dependency-light machine-event core;
-- a session state machine for operator context and machine cycles;
-- a reconnect-capable RTSP frame source with credential-safe metadata;
-- a one-command RTSP field-validation harness with JSON metrics and optional snapshot;
-- a detector-independent three-finger gesture state machine with ROI, hold, cooldown and frame sampling;
-- an optional MediaPipe hand-landmark adapter and CNC RTSP gesture demo;
-- FFmpeg-based RTSP operator voice-note capture with a 120-second ceiling and optional silence stop;
-- an offline-first pluggable speech-to-text interface with an optional faster-whisper adapter;
-- a deterministic material/process normalizer with Indonesian spoken aliases and ambiguity gates;
-- `job_context_set` emission only when required fields are unambiguous and confidence passes review gates;
-- a CLI demo that emits an Open Machine Event JSON document;
-- a draft Open Machine Event format;
-- architecture, RTSP, gesture, audio, speech and CNC integration documentation;
-- CI and contribution scaffolding.
+- machine-event and session state models;
+- reconnect-capable RTSP frame capture with credential-safe metadata;
+- RTSP field-validation CLI;
+- three-finger gesture trigger with ROI, hold time, confidence, cooldown, and frame sampling;
+- optional MediaPipe hand-landmark adapter;
+- FFmpeg RTSP operator voice-note capture with a 120-second ceiling and silence stop;
+- offline-first speech-to-text interface with an optional faster-whisper adapter;
+- deterministic material/process normalization with Indonesian spoken aliases and ambiguity gates;
+- PLC-first, vendor-neutral machine-cycle triggering with measured/inferred signal provenance and debounce;
+- a simulated machine-state source for development without a physical CNC;
+- cycle evidence recording with decoded-frame pre-roll, MP4 output, and default snapshots at 0s / +2s / +10s;
+- one JSON job manifest that groups machine/job context and evidence events;
+- `CNCWorkflow`, which connects armed job context, machine-cycle events, and evidence capture;
+- automated tests and CI across Python 3.11 and 3.12.
 
-PLC/Modbus and production recording adapters are planned work. The RTSP, gesture, audio and speech paths still require field validation on the real CNC installation. Do not deploy this repository as a safety system or as the sole source of machine-state truth.
+The software path is implemented, but **real CNC field validation is still required** for RTSP stability, gesture accuracy, microphone quality, speech normalization, machine-run signal mapping, and a complete machining-cycle evidence bundle. FactoryLens is not a safety system or the sole source of machine-state truth.
 
 ## CNC field prototype
 
 ![FactoryLens CNC field prototype](docs/assets/factorylens-field-prototype.jpg)
 
-The first physical camera-placement experiment is now documented, including mounting observations, collision/vibration concerns, ROI considerations, cable routing and the next field-validation checklist.
+The first physical camera-placement experiment is documented with mounting, collision/vibration, ROI, cable-routing, and field-validation notes.
 
 See [docs/FIELD_PROTOTYPE.md](docs/FIELD_PROTOTYPE.md).
 
@@ -104,7 +94,7 @@ factorylens demo-event --output demo-event.jsonl
 pytest
 ```
 
-For a real RTSP camera source:
+### Validate a real RTSP camera
 
 ```bash
 python -m pip install -e ".[camera]"
@@ -117,16 +107,18 @@ factorylens validate-rtsp \
   --report data/validation/cnc-03-rtsp-report.json
 ```
 
-The report and snapshot remain under the Git-ignored `data/` directory. The report stores the RTSP source URI with credentials redacted.
+The `data/` directory is Git-ignored. Validation reports store RTSP URIs with credentials redacted.
 
-To test the three-finger operator trigger after the RTSP baseline is stable:
+### Test the three-finger trigger
 
 ```bash
 python -m pip install -e ".[camera,gesture]"
 python examples/cnc/gesture_trigger_demo.py
 ```
 
-To capture the operator voice note from the camera's RTSP audio track, install FFmpeg and run:
+### Capture an operator voice note
+
+Install FFmpeg, then run:
 
 ```bash
 factorylens capture-operator-note \
@@ -136,7 +128,7 @@ factorylens capture-operator-note \
   --silence-seconds 3
 ```
 
-Test job normalization without any speech model:
+### Test job-context normalization
 
 ```bash
 factorylens normalize-job-text \
@@ -145,7 +137,7 @@ factorylens normalize-job-text \
   --machine-id cnc-03
 ```
 
-For local speech-to-text, pre-stage a faster-whisper model and run:
+For local speech-to-text, pre-stage a faster-whisper model:
 
 ```bash
 python -m pip install -e ".[speech]"
@@ -156,7 +148,20 @@ factorylens transcribe-operator-note \
   --machine-id cnc-03
 ```
 
-See [docs/RTSP_CAMERA.md](docs/RTSP_CAMERA.md), [docs/GESTURE_TRIGGER.md](docs/GESTURE_TRIGGER.md), [docs/AUDIO_CAPTURE.md](docs/AUDIO_CAPTURE.md) and [docs/SPEECH_JOB_CONTEXT.md](docs/SPEECH_JOB_CONTEXT.md).
+## Machine-cycle and evidence APIs
+
+FactoryLens intentionally keeps the machine-state adapter independent from the CNC vendor. Convert controller/PLC/Modbus/OPC UA/GPIO/visual state into a `MachineStateObservation`, then let `DebouncedCycleTrigger` emit stable cycle events.
+
+`JobEvidenceRecorder` continuously buffers recent camera frames. On cycle start it flushes pre-roll into the video, captures scheduled snapshots, and on cycle finish writes a job manifest.
+
+See:
+
+- [docs/MACHINE_CYCLE.md](docs/MACHINE_CYCLE.md)
+- [docs/EVIDENCE_RECORDING.md](docs/EVIDENCE_RECORDING.md)
+- [docs/RTSP_CAMERA.md](docs/RTSP_CAMERA.md)
+- [docs/GESTURE_TRIGGER.md](docs/GESTURE_TRIGGER.md)
+- [docs/AUDIO_CAPTURE.md](docs/AUDIO_CAPTURE.md)
+- [docs/SPEECH_JOB_CONTEXT.md](docs/SPEECH_JOB_CONTEXT.md)
 
 ## Design principles
 
@@ -168,42 +173,29 @@ See [docs/RTSP_CAMERA.md](docs/RTSP_CAMERA.md), [docs/GESTURE_TRIGGER.md](docs/G
 6. **Human-friendly** — operators should not need a developer console to add context.
 7. **Safe by default** — FactoryLens observes and records; machine control must remain explicit and isolated.
 
-## Repository map
-
-```text
-src/factorylens/       event core, session model, validation, sources, audio, speech and vision
-examples/cnc/          CNC configuration, simulation and field demos
-docs/                  architecture, event format, setup guides and project vision
-tests/                 unit tests
-.github/workflows/     CI
-```
-
 ## Integration status
 
 - [x] RTSP frame source with reconnect and frame metadata
 - [x] RTSP field-validation CLI harness
 - [x] three-finger gesture trigger core + optional hand-landmark adapter
-- [ ] field-calibrated gesture accuracy on the real CNC installation
 - [x] bounded RTSP operator audio capture through FFmpeg
-- [ ] field-validated speech quality and silence settings on the real CNC installation
 - [x] pluggable offline speech-to-text interface + optional faster-whisper adapter
 - [x] controlled material/process normalizer with ambiguity/confidence gating
-- [ ] field-validated vocabulary and transcription accuracy on real operator audio
-- [ ] ONVIF discovery/control metadata
-- [ ] Modbus machine-state adapter
-- [ ] OPC UA adapter
-- [ ] MQTT and webhook outputs
-- [ ] pre-roll video buffer
-- [ ] multi-camera evidence capture
+- [x] vendor-neutral debounced machine-cycle trigger interface
+- [x] explicit measured/inferred/simulated signal provenance
+- [x] decoded-frame video pre-roll + start snapshots + job evidence manifest
+- [x] end-to-end CNC workflow orchestration test
+- [ ] field-calibrated gesture accuracy on the real CNC installation
+- [ ] field-validated microphone quality and silence settings
+- [ ] field-validated speech vocabulary and transcription accuracy
+- [ ] first real CNC run-signal adapter/configuration
+- [ ] complete real machining-cycle evidence validation
+- [ ] Modbus / OPC UA / GPIO concrete adapters
+- [ ] detector plugin API and OpenVINO industrial-vision reference adapter
+- [ ] compressed/encoded pre-roll suitable for multi-camera production
 - [ ] dashboard and searchable machine timeline
 
 See [ROADMAP.md](ROADMAP.md) for the staged plan.
-
-## Open Machine Event
-
-FactoryLens is also experimenting with a small vendor-neutral event envelope so machine observations can move between cameras, PLC adapters, dashboards, and analytics tools without each integration inventing a new format.
-
-See [docs/OPEN_MACHINE_EVENT.md](docs/OPEN_MACHINE_EVENT.md).
 
 ## Security
 
@@ -213,7 +205,7 @@ See [SECURITY.md](SECURITY.md).
 
 ## Contributing
 
-The project is intentionally young. Architecture feedback, machine integration stories, documentation fixes, and small adapters are especially welcome.
+Architecture feedback, machine integration stories, documentation fixes, test fixtures, and small adapters are welcome.
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) and check the open issues.
 
