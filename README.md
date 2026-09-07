@@ -70,7 +70,7 @@ For an instant preview without waiting 45 seconds:
 python examples/prelaunch_demo.py
 ```
 
-It writes a simulated `timeline.jsonl` and `manifest.json` under `data/prelaunch-demo/`. The demo exists to explain the architecture while the physical camera/CNC field-validation gates are still open. It is **not** presented as real machining evidence.
+It writes a simulated `timeline.jsonl` and `manifest.json` under `data/prelaunch-demo/`. The demo exists to explain the architecture while the real CNC field-validation gates are still open. The first physical camera installation is now complete, but the simulated demo is **not** presented as real machining evidence.
 
 See [docs/PRELAUNCH.md](docs/PRELAUNCH.md) for the public demo and launch playbook.
 
@@ -92,15 +92,16 @@ FactoryLens is **pre-alpha**. The v0.1 software path now includes:
 - one JSON job manifest that groups machine/job context and evidence events;
 - `CNCWorkflow`, which connects armed job context, machine-cycle events, and evidence capture;
 - a 45-second pre-launch simulation for public demos without hardware;
+- **first physical camera installation on the CNC completed for field testing**;
 - automated tests and CI across Python 3.11 and 3.12.
 
-The software path is implemented, but **real CNC field validation is still required** for RTSP stability, gesture accuracy, microphone quality, speech normalization, machine-run signal mapping, and a complete machining-cycle evidence bundle. FactoryLens is not a safety system or the sole source of machine-state truth.
+The software path and first camera installation are complete, but **real CNC field validation is still required** for RTSP stability, gesture accuracy, microphone quality, speech normalization, machine-run signal mapping, and a complete machining-cycle evidence bundle. FactoryLens is not a safety system or the sole source of machine-state truth.
 
 ## CNC field prototype
 
 ![FactoryLens CNC field prototype](docs/assets/factorylens-field-prototype.jpg)
 
-The first physical camera-placement experiment is documented with mounting, collision/vibration, ROI, cable-routing, and field-validation notes.
+The first physical camera has now been installed on the CNC prototype bracket. The installation provides a close observation angle toward the spindle/work area and moves the project from camera-placement experiments into real field-validation work. Mounting, collision/vibration, ROI, cable-routing, stream stability, and audio still require validation under actual machine operation.
 
 See [docs/FIELD_PROTOTYPE.md](docs/FIELD_PROTOTYPE.md).
 
@@ -210,6 +211,8 @@ See:
 - [x] decoded-frame video pre-roll + start snapshots + job evidence manifest
 - [x] end-to-end CNC workflow orchestration test
 - [x] hardware-free pre-launch simulation
+- [x] first physical CNC camera installation completed
+- [ ] RTSP stability validated through a complete real machining cycle
 - [ ] field-calibrated gesture accuracy on the real CNC installation
 - [ ] field-validated microphone quality and silence settings
 - [ ] field-validated speech vocabulary and transcription accuracy
