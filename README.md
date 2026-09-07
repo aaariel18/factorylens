@@ -1,5 +1,9 @@
 # FactoryLens
 
+<p align="center">
+  <img src="docs/assets/social-preview.svg" alt="FactoryLens social preview" width="100%" />
+</p>
+
 **Open-source observability and black-box recording for machines that don't have APIs.**
 
 FactoryLens is an early-stage open-source project for bringing modern observability to legacy industrial machines using cameras, audio, machine signals, and event-driven evidence capture.
@@ -51,6 +55,25 @@ Write one evidence manifest for the job
 
 The long-term idea is **human-to-machine metadata**: let operators attach production context to a machine without stopping to use a keyboard.
 
+## Try it without a camera or CNC
+
+The pre-launch demo is deliberately hardware-free and marks its machine signal as **simulated**.
+
+```bash
+python -m pip install -e ".[dev]"
+python examples/prelaunch_demo.py --realtime --duration 45
+```
+
+For an instant preview without waiting 45 seconds:
+
+```bash
+python examples/prelaunch_demo.py
+```
+
+It writes a simulated `timeline.jsonl` and `manifest.json` under `data/prelaunch-demo/`. The demo exists to explain the architecture while the physical camera/CNC field-validation gates are still open. It is **not** presented as real machining evidence.
+
+See [docs/PRELAUNCH.md](docs/PRELAUNCH.md) for the public demo and launch playbook.
+
 ## Current status
 
 FactoryLens is **pre-alpha**. The v0.1 software path now includes:
@@ -68,6 +91,7 @@ FactoryLens is **pre-alpha**. The v0.1 software path now includes:
 - cycle evidence recording with decoded-frame pre-roll, MP4 output, and default snapshots at 0s / +2s / +10s;
 - one JSON job manifest that groups machine/job context and evidence events;
 - `CNCWorkflow`, which connects armed job context, machine-cycle events, and evidence capture;
+- a 45-second pre-launch simulation for public demos without hardware;
 - automated tests and CI across Python 3.11 and 3.12.
 
 The software path is implemented, but **real CNC field validation is still required** for RTSP stability, gesture accuracy, microphone quality, speech normalization, machine-run signal mapping, and a complete machining-cycle evidence bundle. FactoryLens is not a safety system or the sole source of machine-state truth.
@@ -185,6 +209,7 @@ See:
 - [x] explicit measured/inferred/simulated signal provenance
 - [x] decoded-frame video pre-roll + start snapshots + job evidence manifest
 - [x] end-to-end CNC workflow orchestration test
+- [x] hardware-free pre-launch simulation
 - [ ] field-calibrated gesture accuracy on the real CNC installation
 - [ ] field-validated microphone quality and silence settings
 - [ ] field-validated speech vocabulary and transcription accuracy
@@ -197,17 +222,19 @@ See:
 
 See [ROADMAP.md](ROADMAP.md) for the staged plan.
 
+## Help shape the project
+
+You do **not** need access to a CNC to contribute. Good first contributions include small adapters, docs, test fixtures, CLI improvements, event-schema feedback, and deployment examples.
+
+See the open issues, especially those marked `good first issue`, and read [CONTRIBUTING.md](CONTRIBUTING.md).
+
+For maintainers preparing public posts, the copy-ready launch kit is in [docs/LAUNCH_POSTS.md](docs/LAUNCH_POSTS.md).
+
 ## Security
 
 Never commit RTSP usernames/passwords, camera accounts, PLC credentials, internal IP inventories, production video, operator audio, transcripts, or `.env` files. Use `.env.example` only as a template.
 
 See [SECURITY.md](SECURITY.md).
-
-## Contributing
-
-Architecture feedback, machine integration stories, documentation fixes, test fixtures, and small adapters are welcome.
-
-Read [CONTRIBUTING.md](CONTRIBUTING.md) and check the open issues.
 
 ## License
 
