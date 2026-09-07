@@ -3,13 +3,13 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
-from factorylens.cycle import CycleTriggerConfig, DebouncedCycleTrigger
-from factorylens.events import EventType
-from factorylens.evidence import EvidenceRecorderConfig, JobEvidenceRecorder
-from factorylens.session import MachineSession, SessionState
-from factorylens.simulation import SimulatedMachineSignal
-from factorylens.sources.rtsp import FramePacket
-from factorylens.workflow import CNCWorkflow
+import factorylens.cycle
+import factorylens.events
+import factorylens.evidence
+import factorylens.session
+import factorylens.simulation
+import factorylens.sources.rtsp
+import factorylens.workflow
 
 
 BASE = datetime(2026, 9, 7, 2, 0, tzinfo=UTC)
@@ -47,8 +47,8 @@ class FakeBackend:
         return self.sink
 
 
-def packet(seconds: float, sequence: int, frame: str) -> FramePacket:
-    return FramePacket(
+def packet(seconds: float, sequence: int, frame: str) -> factorylens.sources.rtsp.FramePacket:
+    return factorylens.sources.rtsp.FramePacket(
         frame=frame,
         timestamp=BASE + timedelta(seconds=seconds),
         source_id="cnc-03-spindle",
@@ -61,11 +61,11 @@ def packet(seconds: float, sequence: int, frame: str) -> FramePacket:
 
 def test_evidence_recorder_keeps_pre_roll_snapshots_and_manifest(tmp_path: Path) -> None:
     backend = FakeBackend()
-    recorder = JobEvidenceRecorder(
+    recorder = factorylens.evidence.JobEvidenceRecorder(
         "cnc-03",
         machine_type="cnc_milling",
         job={"material": "S45C", "process": "finishing"},
-        config=EvidenceRecorderConfig(
+        config=factorylens.evidence.EvidenceRecorderConfig(
             root_dir=tmp_path,
             pre_roll_seconds=5.0,
             snapshot_offsets_seconds=(0.0, 2.0, 10.0),
@@ -77,7 +77,7 @@ def test_evidence_recorder_keeps_pre_roll_snapshots_and_manifest(tmp_path: Path)
     recorder.ingest(packet(-4.0, 2, "pre-4"))
     recorder.ingest(packet(-1.0, 3, "pre-1"))
 
-    session = MachineSession("cnc-03", "cnc_milling")
+    session = factorylens.session.MachineSession("cnc-03", "cnc_milling")
     session.trigger_operator_note()
     session.set_job_context(material="S45C", process="finishing")
     started = session.machine_started(timestamp=BASE, trigger_source="plc-run")
@@ -92,8 +92,8 @@ def test_evidence_recorder_keeps_pre_roll_snapshots_and_manifest(tmp_path: Path)
     result = recorder.finish_cycle(finished)
 
     assert [event.event_type for event in start_events] == [
-        EventType.VIDEO_RECORDING_STARTED,
-        EventType.SNAPSHOT_CAPTURED,
+        factorylens.events.EventType.VIDEO_RECORDING_STARTED,
+        factorylens.events.EventType.SNAPSHOT_CAPTURED,
     ]
     assert backend.sink.frames[:2] == ["pre-4", "pre-1"]
     assert len(backend.snapshots) == 3
@@ -110,37 +110,37 @@ def test_evidence_recorder_keeps_pre_roll_snapshots_and_manifest(tmp_path: Path)
 
 
 def test_workflow_connects_armed_session_cycle_and_evidence(tmp_path: Path) -> None:
-    session = MachineSession("cnc-03", "cnc_milling")
+    session = factorylens.session.MachineSession("cnc-03", "cnc_milling")
     session.trigger_operator_note()
     context = session.set_job_context(material="S45C", process="finishing")
 
-    trigger = DebouncedCycleTrigger(
+    trigger = factorylens.cycle.DebouncedCycleTrigger(
         "cnc-03",
         machine_type="cnc_milling",
-        config=CycleTriggerConfig(
+        config=factorylens.cycle.CycleTriggerConfig(
             start_stability_seconds=0.0,
             stop_stability_seconds=0.0,
         ),
     )
     backend = FakeBackend()
-    recorder = JobEvidenceRecorder(
+    recorder = factorylens.evidence.JobEvidenceRecorder(
         "cnc-03",
         machine_type="cnc_milling",
-        config=EvidenceRecorderConfig(
+        config=factorylens.evidence.EvidenceRecorderConfig(
             root_dir=tmp_path,
             snapshot_offsets_seconds=(0.0,),
         ),
         backend=backend,
     )
-    workflow = CNCWorkflow(session, trigger, recorder)
+    workflow = factorylens.workflow.CNCWorkflow(session, trigger, recorder)
     workflow.attach_event(context)
     workflow.ingest_frame(packet(-1.0, 1, "pre-roll"))
 
-    signal = SimulatedMachineSignal("simulated-run-bit")
+    signal = factorylens.simulation.SimulatedMachineSignal("simulated-run-bit")
     started = workflow.process_machine_state(signal.observe(True, timestamp=BASE))
 
     assert started.reason == "cycle_started"
-    assert session.state is SessionState.RECORDING
+    assert session.state is factorylens.session.SessionState.RECORDING
     assert recorder.active is True
     assert started.events[0].data["signal_class"] == "simulated"
 
@@ -152,5 +152,5 @@ def test_workflow_connects_armed_session_cycle_and_evidence(tmp_path: Path) -> N
     assert finished.reason == "cycle_finished"
     assert finished.evidence is not None
     assert finished.evidence.manifest_path.exists()
-    assert session.state is SessionState.COMPLETE
+    assert session.state is factorylens.session.SessionState.COMPLETE
     assert recorder.active is False
